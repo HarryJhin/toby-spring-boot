@@ -22,6 +22,7 @@ public class TobySpringBootApplication {
         // tomcat servlet container
         TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
         WebServer webServer = factory.getWebServer(servletContext -> {
+            HelloController helloController = new HelloController();
             servletContext.addServlet("frontController", new HttpServlet() {
                 @Override
                 protected void service(HttpServletRequest req, HttpServletResponse resp)
@@ -33,9 +34,12 @@ public class TobySpringBootApplication {
                     if (req.getRequestURI().equals("/hello") &&
                         req.getMethod().equals(HttpMethod.GET.name())
                     ) {
+                        String name = req.getParameter("name");
+                        String hello = helloController.hello(name);
+
                         resp.setStatus(HttpStatus.OK.value());
                         resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
-                        resp.getWriter().println("Hello, " + req.getParameter("name"));
+                        resp.getWriter().println(hello);
                     } else { // 그 외의 요청에 대한 처리
                         resp.setStatus(HttpStatus.NOT_FOUND.value());
                     }
