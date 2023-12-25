@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,10 +19,19 @@ public class TobySpringBootApplication {
         // original
         // SpringApplication.run(TobySpringBootApplication.class, args);
 
+        // application context
+        GenericApplicationContext context = new GenericApplicationContext();
+
+        // register bean
+        context.registerBean(HelloController.class);
+
+        // refresh
+        context.refresh();
+
         // tomcat servlet container
         TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
         WebServer webServer = factory.getWebServer(servletContext -> {
-            HelloController helloController = new HelloController();
+            HelloController helloController = context.getBean(HelloController.class);
             servletContext.addServlet("frontController", new HttpServlet() {
                 @Override
                 protected void service(HttpServletRequest req, HttpServletResponse resp)
