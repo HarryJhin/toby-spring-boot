@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -21,15 +22,25 @@ public class TobySpringBootApplication {
         // tomcat servlet container
         TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
         WebServer webServer = factory.getWebServer(servletContext -> {
-            servletContext.addServlet("hello", new HttpServlet() {
+            servletContext.addServlet("frontController", new HttpServlet() {
                 @Override
                 protected void service(HttpServletRequest req, HttpServletResponse resp)
                     throws ServletException, IOException {
-                    resp.setStatus(HttpStatus.OK.value());
-                    resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
-                    resp.getWriter().println("Hello, " + req.getParameter("name"));
+
+                    // 프론트 컨트롤러에서 수행하는 인증, 보안 등의 공통 기능이 구현됨.
+
+                    // hello 요청에 대한 처리
+                    if (req.getRequestURI().equals("/hello") &&
+                        req.getMethod().equals(HttpMethod.GET.name())
+                    ) {
+                        resp.setStatus(HttpStatus.OK.value());
+                        resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
+                        resp.getWriter().println("Hello, " + req.getParameter("name"));
+                    } else { // 그 외의 요청에 대한 처리
+                        resp.setStatus(HttpStatus.NOT_FOUND.value());
+                    }
                 }
-            }).addMapping("/hello");
+            }).addMapping("/*");
         });
         webServer.start();
     }
